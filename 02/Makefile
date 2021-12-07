@@ -9,7 +9,7 @@ LIBS = -lm
 TARGET = 02
 
 $(TARGET): $(TARGET).c
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c $(LIBS)
+	$(CC) $(CFLAGS) -o $(TARGET).o $(TARGET).c $(LIBS)
 
 clean:
 	 rm $(TARGET)
