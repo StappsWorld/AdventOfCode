@@ -1,5 +1,5 @@
 /* 
-   Advent of Code 2021 - Day 01
+   Advent of Code 2021 - Day 02
    Samuel Rembisz
 */
 
