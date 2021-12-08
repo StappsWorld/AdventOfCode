@@ -4,8 +4,10 @@
 #include <time.h>
 
 #define WIDTH (size_t) 5
+#define UNDERLINE "\033[4m"
+#define CLOSEUNDERLINE "\033[0m"
 
-#if 1
+#if 0
 #define FILE_NAME "sample.txt"
 #else
 #define FILE_NAME "input.txt"
@@ -13,45 +15,28 @@
 
 int has_won(size_t *board) {
     size_t i, j, total = 0;
-    int c_is_great = 0;
-    for(i = 0, total = 0; i < WIDTH; i++) {
+    for(i = 0, total = 0; i < WIDTH; i++, total = 0) {
         for(j = 0; j < WIDTH; j++) {
             if(board[i * WIDTH + j]) {
                 total++;
             }
         }
         if(total == WIDTH) {
+            printf("\nWon by row %lu\n", i + 1);
             return 1;
         }
     }
 
-    for(i = 0, total = 0; i < WIDTH; i++) {
+    for(i = 0, total = 0; i < WIDTH; i++, total = 0) {
         for(j = 0; j < WIDTH; j++) {
             if(board[j * WIDTH + i]) {
                 total++;
             }
         }
         if(total == WIDTH) {
+            printf("\nWon by column %lu\n", i + 1);
             return 1;
         }
-    }
-
-    for(i = 0, total = 0; i < WIDTH; i++) {
-        if(board[i * WIDTH + i]) {
-            total++;
-        }
-    }
-    if(total == WIDTH) {
-        return 1;
-    }
-
-    for(c_is_great = WIDTH - 1, total = 0; c_is_great >= 0; c_is_great--) {
-        if(board[c_is_great * WIDTH + c_is_great]) {
-            total++;
-        }
-    }
-    if(total == WIDTH) {
-        return 1;
     }
 
     return 0;
@@ -59,7 +44,7 @@ int has_won(size_t *board) {
 
 int part1() {
     FILE *fp = fopen(FILE_NAME, "r");
-    size_t i = 0, j = 0, k = 0, *draw_order = malloc(sizeof(size_t) * 100), **boards_arr, **mark_arr, boards = 0, current_board = 0;
+    size_t i = 0, j = 0, k = 0, l = 0, *draw_order = malloc(sizeof(size_t) * 100), **boards_arr, **mark_arr, boards = 0, current_board = 0, sum = 0;
     char *line = malloc(sizeof(char) * 300), *token = malloc(sizeof(char) * 300);
 
     if(fp == NULL) {
@@ -116,31 +101,63 @@ int part1() {
             return EXIT_FAILURE;
         }
 
-        for(i = 0, j = 0; i < WIDTH; i++) {
+        for(i = 0, j = 0; i < WIDTH; i++, j = 0) {
             if(fgets(line, 300, fp) == NULL) {
                 printf("Failed to get full board!\n");
                 return EXIT_FAILURE;
             }
 
+            /*printf("Parsing %s\n", line);*/
+
             while ((token = strtok(j ? NULL : line, " ")) != NULL) {
-                printf("%s\n", token);
+                /*printf("%s\n", token);*/
                 boards_arr[current_board][i * WIDTH + j++] = atoi(token);
             }
-            printf("%lu\n", i);
+            /*printf("%lu\n", i);*/
         }
 
         current_board++;
     }
 
-    for(i = 0; i < boards; i++) {
-        for(j = 0; j < WIDTH; j++) {
+    for(i = 0; i < 100; i++) {
+        printf("%lu ", draw_order[i]);
+        for(j = 0; j < boards; j++) {
             for(k = 0; k < WIDTH; k++) {
-                printf("%lu ", boards_arr[i][j * WIDTH + k]);
+                for(l = 0; l < WIDTH; l++) {
+                    if(boards_arr[j][k * WIDTH + l] == draw_order[i]) {
+                        mark_arr[j][k * WIDTH + l] = 1;
+                    }
+                }
             }
-            printf("\n");
+            if(has_won(mark_arr[j])) {
+                printf("\n");
+                for(k = 0; k < WIDTH; k++) {
+                    for(l = 0; l < WIDTH; l++) {
+                        if(mark_arr[j][k * WIDTH + l]) {
+                            printf(UNDERLINE"%02lu"CLOSEUNDERLINE" ", boards_arr[j][k * WIDTH + l]);
+                        } else {
+                            printf("%02lu ", boards_arr[j][k * WIDTH + l]);
+                        }
+                    }
+                    printf("\n");
+                }
+                goto BREAK_LOOP;
+            }
         }
-        printf("\n");
     }
+
+BREAK_LOOP:
+
+    for(k = 0; k < WIDTH; k++) {
+        for(l = 0; l < WIDTH; l++) {
+            if(!mark_arr[j][k * WIDTH + l]) {
+                sum += boards_arr[j][k * WIDTH + l];
+            }
+        }
+    }
+    
+
+    printf("The final score is: %lu * %lu = %lu\n", draw_order[i], sum, draw_order[i] * sum);
 
 
     for(i = 0; i < boards; i++) {
