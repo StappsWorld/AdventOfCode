@@ -12,4 +12,4 @@ $(TARGET): $(TARGET).c
 	$(CC) $(CFLAGS) -o $(TARGET).o $(TARGET).c $(LIBS)
 
 clean:
-	 rm $(TARGET)
+	 rm $(TARGET).o
